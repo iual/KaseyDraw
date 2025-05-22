@@ -1,13 +1,32 @@
-// LotteryDrawPage.jsx
+// LotteryDrawPage.jsx (JavaScript version with local Button component)
 // Interactive raffle page for drawing table and seat numbers with configurable upper limits.
-// Built with React, TailwindCSS, Framer Motion, lucide-react icons, canvas-confetti, and shadcn/ui Button.
+// Built with React, TailwindCSS, Framer Motion, lucide-react icons, and canvas-confetti.
 // -----------------------------------------------------------------------------
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Dice3, RefreshCcw } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import confetti from "canvas-confetti";
+
+// Simple Tailwind styled button (replaces shadcn/ui dependency)
+function Button({ children, className = "", variant = "primary", ...props }) {
+  const base =
+    "px-5 py-2 rounded-xl font-medium transition-transform active:scale-95 disabled:opacity-50";
+  const variants = {
+    primary:
+      "bg-white/20 hover:bg-white/30 backdrop-blur text-white shadow-md",
+    secondary:
+      "bg-white text-indigo-700 hover:bg-indigo-100 shadow-md",
+  };
+  return (
+    <button
+      className={`${base} ${variants[variant]} ${className}`}
+      {...props}
+    >
+      {children}
+    </button>
+  );
+}
 
 // Animation timing
 const FLASH_COUNT = 50; // number of interim flashes before final result
@@ -15,16 +34,16 @@ const FLASH_INTERVAL = 100; // milliseconds between flashes
 
 export default function LotteryDrawPage() {
   // Upper‑limit states (editable by user)
-  const [tableMax, setTableMax] = useState<number>(30);
-  const [seatMax, setSeatMax] = useState<number>(10);
+  const [tableMax, setTableMax] = useState(30);
+  const [seatMax, setSeatMax] = useState(10);
 
   // Draw results
-  const [table, setTable] = useState<number | null>(null);
-  const [seat, setSeat] = useState<number | null>(null);
+  const [table, setTable] = useState(null);
+  const [seat, setSeat] = useState(null);
   const [rolling, setRolling] = useState(false);
 
   // Core draw logic with animated shuffle
-  const roll = (type: "table" | "seat") => {
+  const roll = (type) => {
     if (rolling) return;
     setRolling(true);
 
@@ -32,7 +51,11 @@ export default function LotteryDrawPage() {
     const id = setInterval(() => {
       const max = type === "table" ? tableMax : seatMax;
       const value = Math.floor(Math.random() * max) + 1;
-      type === "table" ? setTable(value) : setSeat(value);
+      if (type === "table") {
+        setTable(value);
+      } else {
+        setSeat(value);
+      }
       flashes -= 1;
       if (flashes <= 0) {
         clearInterval(id);
@@ -50,7 +73,7 @@ export default function LotteryDrawPage() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-indigo-800 via-purple-700 to-pink-600 text-white p-4 select-none">
-      <h1 className="text-5xl font-extrabold mb-8 drop-shadow-xl tracking-tight">东营开心喜宴抽奖</h1>
+      <h1 className="text-5xl font-extrabold mb-8 drop-shadow-xl tracking-tight">东营喜宴</h1>
 
       {/* Config inputs */}
       <div className="flex flex-col md:flex-row gap-6 mb-10">
